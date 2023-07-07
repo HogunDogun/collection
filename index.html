@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>GitHub Repository File Browser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        h1 {
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+        
+        li {
+            padding: 5px 10px;
+        }
+        
+        li:hover {
+            background-color: #f2f2f2;
+        }
+        
+        .directory {
+            font-weight: bold;
+        }
+        
+        .file {
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <h1>GitHub Repository File Browser</h1>
+    <ul id="fileList"></ul>
+
+    <script>
+        // GitHub repository information
+        var username = 'HogunDogun';
+        var repository = 'wacewebsite ';
+        var branch = 'main';
+
+        // GitHub API URL to retrieve repository contents
+        var apiUrl = `https://api.github.com/repos/${username}/${repository}/contents?ref=${branch}`;
+
+        // Fetch repository contents using GitHub API
+        fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                // Loop through each item in the repository
+                data.forEach(item => {
+                    var listItem = document.createElement('li');
+                    listItem.textContent = item.name;
+
+                    // Add appropriate class for directories or files
+                    if (item.type === 'dir') {
+                        listItem.classList.add('directory');
+                    } else {
+                        listItem.classList.add('file');
+                    }
+
+                    // If it's a directory, add a click event to load its contents
+                    if (item.type === 'dir') {
+                        listItem.addEventListener('click', function() {
+                            loadDirectory(item.path);
+                        });
+                    }
+
+                    document.getElementById('fileList').appendChild(listItem);
+                });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        // Function to load contents of a directory
+        function loadDirectory(path) {
+            var directoryUrl = `https://api.github.com/repos/${username}/${repository}/contents/${path}?ref=${branch}`;
+
+            // Clear the existing file list
+            document.getElementById('fileList').innerHTML = '';
+
+            // Fetch the directory contents using GitHub API
+            fetch(directoryUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // Loop through each item in the directory
+                    data.forEach(item => {
+                        var listItem = document.createElement('li');
+                        listItem.textContent = item.name;
+
+                        // Add appropriate class for directories or files
+                        if (item.type === 'dir') {
+                            listItem.classList.add('directory');
+                        } else {
+                            listItem.classList.add('file');
+                        }
+
+                        // If it's a directory, add a click event to load its contents
+                        if (item.type === 'dir') {
+                            listItem.addEventListener('click', function() {
+                                loadDirectory(item.path);
+                            });
+                        }
+
+                        document.getElementById('fileList').appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+    </script>
+</body>
+</html>
